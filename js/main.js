@@ -769,17 +769,18 @@ gsap.timeline({
     scrub: 2.5,          // медленно, плавно
     onUpdate: (self) => {
       const p = self.progress;
-      // circle grows from 0% to 150%
-      const pct = Math.round(p * 150);
+      // ease-in: медленно в начале, быстро в конце
+      const eased = Math.pow(p, 2.2);
+      const pct = (eased * 152).toFixed(1);
       document.getElementById('reveal-luxury').style.clipPath =
         `circle(${pct}% at 50% 50%)`;
       // content inside fades in after circle is big enough
-      if (p > 0.4) {
-        const innerP = (p - 0.4) / 0.6;
+      if (p > 0.5) {
+        const innerP = (p - 0.5) / 0.5;
         const inner = document.querySelector('#reveal-luxury .circle-reveal-inner');
         if (inner) {
           inner.style.opacity = innerP;
-          inner.style.transform = `scale(${0.88 + innerP * 0.12})`;
+          inner.style.transform = `scale(${0.9 + innerP * 0.1})`;
         }
       }
     }
@@ -798,7 +799,8 @@ gsap.timeline({
     scrub: 2.5,
     onUpdate: (self) => {
       const p = self.progress;
-      const pct = Math.round(p * 150);
+      const eased = Math.pow(p, 2.2);
+      const pct = (eased * 152).toFixed(1);
       document.getElementById('reveal-contact').style.clipPath =
         `circle(${pct}% at 50% 50%)`;
     }
