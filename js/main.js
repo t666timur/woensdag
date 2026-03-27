@@ -127,11 +127,11 @@ tl2
   );
 
 // ============================================
-// 3D TRANSITION 3: Cyber → Luxury
+// 3D TRANSITION 3: Cyber → Process
 // Cyber взрывается — масштаб растёт до бесконечности
-// Luxury появляется с переворотом по X сверху вниз
+// Process появляется с переворотом по X сверху вниз
 // ============================================
-gsap.set('#luxury', { transformOrigin: '50% 0%', transformPerspective: 1200 });
+gsap.set('#process', { transformPerspective: 1200 });
 
 const tl3 = gsap.timeline({
   scrollTrigger: {
@@ -147,9 +147,63 @@ tl3
     { scale: 1, opacity: 1 },
     { scale: 2.5, opacity: 0, ease: 'none' }
   )
-  .fromTo('#luxury',
-    { rotateX: -60, opacity: 0, filter: 'brightness(0.3)' },
+  .fromTo('#process',
+    { rotateX: -50, opacity: 0, filter: 'brightness(0.3)' },
     { rotateX: 0, opacity: 1, filter: 'brightness(1)', ease: 'none' },
+    0
+  );
+
+// ============================================
+// 3D TRANSITION 3b: Process → About
+// Process уходит с вращением по Y
+// About влетает с противоположного угла
+// ============================================
+gsap.set('#about', { transformPerspective: 1200 });
+
+const tl3b = gsap.timeline({
+  scrollTrigger: {
+    trigger: '.t3b',
+    start: 'top bottom',
+    end: 'bottom top',
+    scrub: 1.2,
+  }
+});
+
+tl3b
+  .fromTo('#process',
+    { rotateY: 0, filter: 'brightness(1)' },
+    { rotateY: -60, filter: 'brightness(0.1)', ease: 'none' }
+  )
+  .fromTo('#about',
+    { rotateY: 60, scale: 0.9, filter: 'brightness(0.3)' },
+    { rotateY: 0, scale: 1, filter: 'brightness(1)', ease: 'none' },
+    0
+  );
+
+// ============================================
+// 3D TRANSITION 3c: About → Luxury
+// About складывается вперёд по X
+// Luxury появляется снизу с масштабом
+// ============================================
+gsap.set('#luxury', { transformOrigin: '50% 0%', transformPerspective: 1200 });
+
+const tl3c = gsap.timeline({
+  scrollTrigger: {
+    trigger: '.t3c',
+    start: 'top bottom',
+    end: 'bottom top',
+    scrub: 1.2,
+  }
+});
+
+tl3c
+  .fromTo('#about',
+    { rotateX: 0, filter: 'brightness(1)' },
+    { rotateX: -55, filter: 'brightness(0.2)', ease: 'none' }
+  )
+  .fromTo('#luxury',
+    { rotateX: 35, scale: 0.85, opacity: 0 },
+    { rotateX: 0, scale: 1, opacity: 1, ease: 'none' },
     0
   );
 
@@ -204,17 +258,33 @@ ScrollTrigger.create({
   trigger: '.t3', start: 'top center', end: 'bottom center',
   onUpdate: (self) => {
     const p = self.progress;
-    mat.opacity = 0.7*(1-p) + p*0.05;
-    particles.scale.setScalar(1 + p*0.5);
+    mat.opacity = 0.7*(1-p) + p*0.3;
+    particles.scale.setScalar(1 + p*0.3);
+  }
+});
+ScrollTrigger.create({
+  trigger: '.t3b', start: 'top center', end: 'bottom center',
+  onUpdate: (self) => {
+    const p = self.progress;
+    mat.opacity = 0.3*(1-p) + p*0.05;
+    particles.scale.setScalar(1.3 - p*0.3);
+  }
+});
+ScrollTrigger.create({
+  trigger: '.t3c', start: 'top center', end: 'bottom center',
+  onUpdate: (self) => {
+    const p = self.progress;
+    mat.opacity = 0.05 + p*0.1;
+    particles.scale.setScalar(1 + p*0.2);
   }
 });
 ScrollTrigger.create({
   trigger: '.t4', start: 'top center', end: 'bottom center',
   onUpdate: (self) => {
     const p = self.progress;
-    mat.opacity = 0.05 + p*0.5;
+    mat.opacity = 0.15 + p*0.5;
     mat.color.setRGB(0.784, 1, 0);
-    particles.scale.setScalar(1.5 - p*0.5);
+    particles.scale.setScalar(1.2 - p*0.2);
   }
 });
 
@@ -255,6 +325,30 @@ ScrollTrigger.create({
   trigger: '.s-luxury', start: 'top bottom', end: 'bottom top', scrub: true,
   onUpdate: (self) => {
     gsap.set('.luxury-frame', { rotateY: (self.progress - 0.5)*25, rotateX: (self.progress - 0.5)*-12 });
+  }
+});
+
+// ============================================
+// PROCESS — steps entrance
+// ============================================
+gsap.utils.toArray('.step').forEach((step, i) => {
+  gsap.to(step, {
+    opacity: 1, y: 0, duration: 0.7, delay: i * 0.15, ease: 'power3.out',
+    scrollTrigger: { trigger: '.steps', start: 'top 80%' }
+  });
+});
+
+// ============================================
+// ABOUT — text & frame entrance
+// ============================================
+gsap.from('.about-title', { opacity: 0, y: 40, duration: 1, scrollTrigger: { trigger: '.about-title', start: 'top 80%' } });
+gsap.from('.about-frame', { opacity: 0, scale: 0.85, duration: 1.2, ease: 'power3.out', scrollTrigger: { trigger: '.about-frame', start: 'top 80%' } });
+
+// About frame — 3D tilt on scroll
+ScrollTrigger.create({
+  trigger: '.s-about', start: 'top bottom', end: 'bottom top', scrub: true,
+  onUpdate: (self) => {
+    gsap.set('.about-frame', { rotateY: (self.progress - 0.5) * 20, rotateX: (self.progress - 0.5) * -10, transformPerspective: 800 });
   }
 });
 
