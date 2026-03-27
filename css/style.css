@@ -415,9 +415,23 @@ body {
    SECTION 4 — LUXURY
    ============================================ */
 .s-luxury {
-  background: var(--white);
+  background: #f5f5f0;
   color: #111;
   padding: 6rem 4rem;
+  isolation: isolate;
+}
+
+.s-luxury::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #f5f5f0;
+  z-index: 0;
+}
+
+.s-luxury > * {
+  position: relative;
+  z-index: 1;
 }
 
 .luxury-content {
@@ -780,6 +794,7 @@ body {
   position: relative;
   height: 100vh;
   background: #f5f5f0;
+  isolation: isolate;
   clip-path: circle(0% at 50% 50%);
   will-change: clip-path;
   z-index: 2;
