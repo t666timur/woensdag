@@ -638,37 +638,26 @@ tl3b
 
 // ============================================
 // 3D TRANSITION 3c: About → Luxury
-// About складывается вперёд по X
-// Luxury появляется снизу с масштабом
+// Используем только circle-reveal (clip-path) — без 3D конфликта
+// About просто затемняется
 // ============================================
-gsap.set('#luxury', { transformOrigin: '50% 0%', transformPerspective: 1200 });
+gsap.set('#luxury', { transformPerspective: 1200, rotateX: 0, rotateY: 0, scale: 1, opacity: 1 });
 
-const tl3c = gsap.timeline({
-  scrollTrigger: {
-    trigger: '.t3c',
-    start: 'top bottom',
-    end: 'bottom top',
-    scrub: 1.2,
+ScrollTrigger.create({
+  trigger: '.t3c',
+  start: 'top bottom',
+  end: 'bottom top',
+  scrub: 1.2,
+  onUpdate: (self) => {
+    const p = self.progress;
+    gsap.set('#about', { filter: `brightness(${1 - p * 0.8})`, ease: 'none' });
   }
 });
 
-tl3c
-  .fromTo('#about',
-    { rotateX: 0, filter: 'brightness(1)' },
-    { rotateX: -55, filter: 'brightness(0.2)', ease: 'none' }
-  )
-  .fromTo('#luxury',
-    { rotateX: 35, scale: 0.85, opacity: 0 },
-    { rotateX: 0, scale: 1, opacity: 1, ease: 'none' },
-    0
-  );
-
 // ============================================
 // 3D TRANSITION 4: Luxury → Contact
-// Luxury сдвигается в перспективе вправо (rotateY)
-// Contact поднимается из-под земли (translateY + rotateX)
+// Contact поднимается снизу
 // ============================================
-gsap.set('#luxury', { transformPerspective: 1200 });
 gsap.set('#contact', { transformOrigin: '50% 100%', transformPerspective: 1200 });
 
 const tl4 = gsap.timeline({
@@ -681,12 +670,8 @@ const tl4 = gsap.timeline({
 });
 
 tl4
-  .fromTo('#luxury',
-    { rotateY: 0, x: 0 },
-    { rotateY: 60, x: '20%', filter: 'brightness(0.2)', ease: 'none' }
-  )
   .fromTo('#contact',
-    { rotateX: 40, y: '10%', filter: 'brightness(0.3)' },
+    { rotateX: 30, y: '8%', filter: 'brightness(0.3)' },
     { rotateX: 0, y: '0%', filter: 'brightness(1)', ease: 'none' },
     0
   );
