@@ -794,6 +794,10 @@ body {
   overflow: hidden;
 }
 
+#reveal-luxury {
+  background: linear-gradient(to bottom, var(--luxury-bg) 40%, var(--dark) 100%);
+}
+
 .circle-reveal-dark {
   background: var(--dark);
   height: 60vh;
