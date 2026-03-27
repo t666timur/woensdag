@@ -284,6 +284,129 @@ const objectTargetOpacity = {
 };
 
 // ============================================
+// PROCEDURAL PANELS — GLSL генерация
+// ============================================
+const panelVert = `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+// Corporate — геометрическая сетка, синий/фиолетовый
+const corpFrag = `
+  uniform float uTime;
+  uniform float uOpacity;
+  varying vec2 vUv;
+  void main() {
+    vec2 uv = vUv;
+    vec2 g = fract(uv * 7.0);
+    float lines = step(0.93, max(g.x, g.y));
+    float pulse = sin(uTime * 0.5 + uv.y * 4.0) * 0.5 + 0.5;
+    float diag = step(0.97, fract((uv.x + uv.y) * 10.0 + uTime * 0.1));
+    vec3 bg   = mix(vec3(0.03, 0.05, 0.18), vec3(0.09, 0.06, 0.26), uv.y);
+    vec3 grid = vec3(0.22, 0.3, 0.9);
+    vec3 acc  = vec3(0.5, 0.8, 1.0);
+    vec3 color = mix(bg, grid, lines * 0.55 * pulse);
+    color = mix(color, acc, diag * 0.4);
+    gl_FragColor = vec4(color, uOpacity * 0.88);
+  }
+`;
+
+// Cyber — neon noise + scanlines
+const cyberFrag = `
+  uniform float uTime;
+  uniform float uOpacity;
+  varying vec2 vUv;
+  float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+  float noise(vec2 p){
+    vec2 i=floor(p); vec2 f=fract(p);
+    f=f*f*(3.0-2.0*f);
+    return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),
+               mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);
+  }
+  void main() {
+    vec2 uv = vUv;
+    float n  = noise(uv * 5.0 + vec2(uTime*0.18, 0.0));
+    float n2 = noise(uv * 11.0 - vec2(0.0, uTime*0.12));
+    float scan = step(0.5, fract(uv.y * 55.0));
+    vec3 cyan = vec3(0.0, 0.96, 1.0);
+    vec3 pink = vec3(1.0, 0.17, 0.47);
+    vec3 dark = vec3(0.02, 0.02, 0.04);
+    vec3 color = mix(dark, cyan, n * 0.75);
+    color += pink * n2 * 0.35;
+    color *= 0.78 + scan * 0.22;
+    gl_FragColor = vec4(color, uOpacity * 0.92);
+  }
+`;
+
+// Luxury — органический FBM, золото/крем
+const luxFrag = `
+  uniform float uTime;
+  uniform float uOpacity;
+  varying vec2 vUv;
+  float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+  float noise(vec2 p){
+    vec2 i=floor(p); vec2 f=fract(p);
+    f=f*f*(3.0-2.0*f);
+    return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),
+               mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);
+  }
+  float fbm(vec2 p){
+    float v=0.0; float a=0.5;
+    for(int i=0;i<5;i++){v+=a*noise(p);p*=2.1;a*=0.5;}
+    return v;
+  }
+  void main() {
+    vec2 uv = vUv;
+    float f  = fbm(uv * 2.5 + vec2(uTime*0.04, uTime*0.03));
+    float f2 = fbm(uv * 4.5 - vec2(uTime*0.025, 0.0));
+    vec3 cream = vec3(0.97, 0.94, 0.87);
+    vec3 gold  = vec3(0.79, 0.66, 0.30);
+    vec3 dark  = vec3(0.08, 0.07, 0.05);
+    vec3 color = mix(cream, gold, f);
+    color = mix(color, dark, f2 * 0.45);
+    gl_FragColor = vec4(color, uOpacity * 0.85);
+  }
+`;
+
+function makePanel(frag, pos, rotY) {
+  const mat = new THREE.ShaderMaterial({
+    vertexShader: panelVert,
+    fragmentShader: frag,
+    uniforms: { uTime: { value: 0 }, uOpacity: { value: 0 } },
+    transparent: true,
+    depthWrite: false,
+    side: THREE.DoubleSide
+  });
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(5, 3.5), mat);
+  mesh.position.set(pos[0], pos[1], pos[2]);
+  mesh.rotation.y = rotY;
+  scene.add(mesh);
+  return mesh;
+}
+
+const panels = {
+  corporate: makePanel(corpFrag,  [ 3.2,  0.0, -3.0], -0.25),
+  cyber:     makePanel(cyberFrag, [-3.2,  0.5, -3.0],  0.25),
+  luxury:    makePanel(luxFrag,   [ 2.8,  0.0, -2.6], -0.15)
+};
+
+['corporate', 'cyber', 'luxury'].forEach(name => {
+  const el = document.getElementById(name);
+  if (!el) return;
+  ScrollTrigger.create({
+    trigger: el,
+    start: 'top 70%', end: 'bottom 30%',
+    onEnter:     () => gsap.to(panels[name].material.uniforms.uOpacity, { value: 1, duration: 1.2 }),
+    onLeave:     () => gsap.to(panels[name].material.uniforms.uOpacity, { value: 0, duration: 0.8 }),
+    onEnterBack: () => gsap.to(panels[name].material.uniforms.uOpacity, { value: 1, duration: 1.2 }),
+    onLeaveBack: () => gsap.to(panels[name].material.uniforms.uOpacity, { value: 0, duration: 0.8 }),
+  });
+});
+
+// ============================================
 // SCROLL: показываем/скрываем 3D объекты
 // ============================================
 function showObject(name) {
@@ -460,6 +583,11 @@ function animateThree() {
 
   const elapsed = clock.getElapsedTime();
   particleMat.uniforms.uTime.value = elapsed;
+  Object.values(panels).forEach(p => { p.material.uniforms.uTime.value = elapsed; });
+  // gentle float
+  panels.corporate.position.y = Math.sin(elapsed * 0.4) * 0.15;
+  panels.cyber.position.y     = 0.5 + Math.sin(elapsed * 0.35 + 1.2) * 0.18;
+  panels.luxury.position.y    = Math.sin(elapsed * 0.3 + 2.5) * 0.12;
 
   // Rotation лёгкая для всего поля частиц
   particles.rotation.y = elapsed * 0.03;
