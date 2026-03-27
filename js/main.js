@@ -720,15 +720,24 @@ document.querySelectorAll('.stat-num').forEach(counter => {
 // ============================================
 // LUXURY — 3D rocking frame on scroll
 // ============================================
-gsap.from('.luxury-eyebrow', { opacity: 0, y: 20, duration: 0.8, scrollTrigger: { trigger: '.luxury-eyebrow', start: 'top 80%' } });
-gsap.from('.luxury-title',   { opacity: 0, y: 40, duration: 1,   scrollTrigger: { trigger: '.luxury-title', start: 'top 80%' } });
-gsap.from('.luxury-frame',   { opacity: 0, scale: 0.8, rotation: 5, duration: 1.2, scrollTrigger: { trigger: '.luxury-frame', start: 'top 80%' } });
-
-ScrollTrigger.create({
-  trigger: '.s-luxury', start: 'top bottom', end: 'bottom top', scrub: true,
-  onUpdate: (self) => {
-    gsap.set('.luxury-frame', { rotateY: (self.progress - 0.5)*25, rotateX: (self.progress - 0.5)*-12 });
-  }
+// Luxury — анимация входа (текст появляется снизу построчно)
+gsap.from('.luxury-eyebrow', {
+  opacity: 0, y: 15, duration: 1,
+  scrollTrigger: { trigger: '.s-luxury', start: 'top 75%' }
+});
+gsap.utils.toArray('.lux-line-text').forEach((line, i) => {
+  gsap.from(line, {
+    y: '110%', duration: 1.1, delay: i * 0.12, ease: 'power3.out',
+    scrollTrigger: { trigger: '.luxury-title', start: 'top 80%' }
+  });
+});
+gsap.from('.luxury-caption', {
+  opacity: 0, y: 20, duration: 0.9, delay: 0.4,
+  scrollTrigger: { trigger: '.luxury-bottom', start: 'top 90%' }
+});
+gsap.from('.btn-luxury', {
+  opacity: 0, y: 20, duration: 0.9, delay: 0.6,
+  scrollTrigger: { trigger: '.luxury-bottom', start: 'top 90%' }
 });
 
 // ============================================

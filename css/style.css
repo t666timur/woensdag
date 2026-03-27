@@ -417,8 +417,10 @@ body {
 .s-luxury {
   background: #f5f5f0;
   color: #111;
-  padding: 6rem 4rem;
+  padding: 5rem 6rem;
   isolation: isolate;
+  justify-content: space-between;
+  gap: 0;
 }
 
 .s-luxury::before {
@@ -434,13 +436,9 @@ body {
   z-index: 1;
 }
 
-.luxury-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6rem;
-  align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
+/* Luxury — полный редизайн */
+.luxury-top {
+  width: 100%;
 }
 
 .luxury-eyebrow {
@@ -449,16 +447,26 @@ body {
   text-transform: uppercase;
   color: var(--gold);
   display: block;
-  margin-bottom: 1.5rem;
+}
+
+.luxury-hero-text {
+  flex: 1;
+  display: flex;
+  align-items: center;
 }
 
 .luxury-title {
   font-family: var(--font-serif);
-  font-size: clamp(3rem, 6vw, 6rem);
+  font-size: clamp(4.5rem, 11vw, 11rem);
   font-weight: 300;
-  line-height: 1.1;
+  line-height: 0.95;
   color: #111;
-  margin-bottom: 2rem;
+  letter-spacing: -0.02em;
+}
+
+.luxury-title .lux-line-text {
+  display: block;
+  overflow: hidden;
 }
 
 .luxury-title em {
@@ -466,12 +474,18 @@ body {
   color: var(--gold);
 }
 
-.luxury-text p {
-  color: #666;
-  font-size: 1rem;
-  line-height: 1.8;
-  max-width: 360px;
-  margin-bottom: 2.5rem;
+.luxury-bottom {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.luxury-caption {
+  font-size: 0.9rem;
+  color: #888;
+  line-height: 1.7;
+  max-width: 280px;
 }
 
 .btn-luxury {
@@ -479,69 +493,31 @@ body {
   color: #111;
   text-decoration: none;
   font-size: 0.85rem;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   border-bottom: 1px solid #111;
   padding-bottom: 0.3rem;
   transition: all 0.3s;
+  white-space: nowrap;
 }
 .btn-luxury:hover {
   color: var(--gold);
   border-color: var(--gold);
 }
 
-.luxury-visual {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.luxury-frame {
-  width: 380px;
-  height: 380px;
-  border: 1px solid rgba(0,0,0,0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.luxury-frame::before, .luxury-frame::after {
-  content: '';
+.luxury-deco-line {
   position: absolute;
-  width: 20px;
-  height: 20px;
-  border-color: var(--gold);
-  border-style: solid;
-}
-.luxury-frame::before {
-  top: -1px; left: -1px;
-  border-width: 1px 0 0 1px;
-}
-.luxury-frame::after {
-  bottom: -1px; right: -1px;
-  border-width: 0 1px 1px 0;
-}
-
-.luxury-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.2rem;
-}
-
-.luxury-inner span {
-  font-family: var(--font-serif);
-  font-size: 2rem;
-  font-weight: 300;
-  letter-spacing: 0.4em;
-  color: #111;
-}
-
-.lux-line {
-  width: 80px;
+  left: 6rem;
+  right: 6rem;
+  bottom: 30%;
   height: 1px;
-  background: var(--gold);
+  background: linear-gradient(to right, transparent, rgba(201,168,76,0.2), transparent);
+  pointer-events: none;
 }
+
+/* keep reveal compat */
+.luxury-content { display: none; }
+.luxury-frame, .luxury-visual, .luxury-inner, .lux-line { display: none; }
 
 /* ============================================
    SECTION 5 — CONTACT
