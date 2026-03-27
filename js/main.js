@@ -759,43 +759,60 @@ ScrollTrigger.create({
 
 // ============================================
 // ZOOM WORD — Apple-style scale transition
-// Word at bottom of section grows to fill screen on scroll
+// Fixed overlay word that grows to fill screen
 // ============================================
 
 // About → Luxury: "Design." раздувается
 ScrollTrigger.create({
   trigger: '#about',
-  start: 'bottom bottom',
-  end: 'bottom top',
+  start: 'bottom 90%',
+  end: 'bottom 10%',
   scrub: 1,
-  pin: false,
+  onEnter: () => gsap.set('#about-zoom-wrap', { visibility: 'visible' }),
+  onLeave: () => gsap.set('#about-zoom-wrap', { visibility: 'hidden', opacity: 1 }),
+  onEnterBack: () => gsap.set('#about-zoom-wrap', { visibility: 'visible' }),
+  onLeaveBack: () => gsap.set('#about-zoom-wrap', { visibility: 'hidden' }),
   onUpdate: (self) => {
     const p = self.progress;
-    // word scales up from 1 to ~30, fades out at the end
-    const scale = 1 + p * 28;
-    const opacity = p < 0.85 ? 1 : 1 - ((p - 0.85) / 0.15);
-    gsap.set('#about-zoom-word', { scale, opacity, transformOrigin: 'center center' });
-    // blur increases as it zooms
-    gsap.set('#about-zoom-word', { filter: `blur(${p * 12}px)` });
-    // simultaneously fade out about content
-    gsap.set('.about-center, .about-bg-text', { opacity: p < 0.3 ? 1 : 1 - ((p - 0.3) / 0.4) });
+    const scale = 1 + p * 35;
+    const opacity = p < 0.8 ? 1 : 1 - ((p - 0.8) / 0.2);
+    gsap.set('#about-zoom-wrap', { opacity: 1 });
+    gsap.set('#about-zoom-word', {
+      scale,
+      opacity,
+      filter: `blur(${Math.min(p * 14, 20)}px)`,
+      transformOrigin: 'center center'
+    });
+    gsap.set('.about-center, .about-bg-text', {
+      opacity: p < 0.25 ? 1 : Math.max(0, 1 - ((p - 0.25) / 0.35))
+    });
   }
 });
 
 // Luxury → Contact: "Next." раздувается
 ScrollTrigger.create({
   trigger: '#luxury',
-  start: 'bottom bottom',
-  end: 'bottom top',
+  start: 'bottom 90%',
+  end: 'bottom 10%',
   scrub: 1,
+  onEnter: () => gsap.set('#luxury-zoom-wrap', { visibility: 'visible' }),
+  onLeave: () => gsap.set('#luxury-zoom-wrap', { visibility: 'hidden', opacity: 1 }),
+  onEnterBack: () => gsap.set('#luxury-zoom-wrap', { visibility: 'visible' }),
+  onLeaveBack: () => gsap.set('#luxury-zoom-wrap', { visibility: 'hidden' }),
   onUpdate: (self) => {
     const p = self.progress;
-    const scale = 1 + p * 28;
-    const opacity = p < 0.85 ? 1 : 1 - ((p - 0.85) / 0.15);
-    gsap.set('#luxury-zoom-word', { scale, opacity, transformOrigin: 'center center' });
-    gsap.set('#luxury-zoom-word', { filter: `blur(${p * 10}px)` });
-    // luxury content fades as zoom grows
-    gsap.set('.luxury-content', { opacity: p < 0.3 ? 1 : 1 - ((p - 0.3) / 0.4) });
+    const scale = 1 + p * 35;
+    const opacity = p < 0.8 ? 1 : 1 - ((p - 0.8) / 0.2);
+    gsap.set('#luxury-zoom-wrap', { opacity: 1 });
+    gsap.set('#luxury-zoom-word', {
+      scale,
+      opacity,
+      filter: `blur(${Math.min(p * 12, 18)}px)`,
+      transformOrigin: 'center center'
+    });
+    gsap.set('.luxury-content', {
+      opacity: p < 0.25 ? 1 : Math.max(0, 1 - ((p - 0.25) / 0.35))
+    });
   }
 });
 
