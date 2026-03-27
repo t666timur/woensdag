@@ -946,3 +946,4 @@ body {
 @media (max-width: 600px) {
   .steps { grid-template-columns: 1fr; }
 }
+/* force redeploy Fri Mar 27 19:53:14 CET 2026 */
