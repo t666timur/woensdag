@@ -742,16 +742,60 @@ gsap.utils.toArray('.step').forEach((step, i) => {
 });
 
 // ============================================
-// ABOUT — text & frame entrance
+// ABOUT — entrance animations
 // ============================================
-gsap.from('.about-title', { opacity: 0, y: 40, duration: 1, scrollTrigger: { trigger: '.about-title', start: 'top 80%' } });
-gsap.from('.about-frame', { opacity: 0, scale: 0.85, duration: 1.2, ease: 'power3.out', scrollTrigger: { trigger: '.about-frame', start: 'top 80%' } });
+gsap.from('.about-bg-text', { opacity: 0, scale: 0.8, duration: 1.5, ease: 'power3.out', scrollTrigger: { trigger: '.s-about', start: 'top 80%' } });
+gsap.from('.about-eyebrow', { opacity: 0, y: 20, duration: 0.8, scrollTrigger: { trigger: '.about-center', start: 'top 80%' } });
+gsap.from('.about-desc',    { opacity: 0, y: 30, duration: 1, delay: 0.2, scrollTrigger: { trigger: '.about-center', start: 'top 80%' } });
+gsap.from('.about-tags-inline span', { opacity: 0, y: 15, stagger: 0.1, duration: 0.6, delay: 0.4, scrollTrigger: { trigger: '.about-tags-inline', start: 'top 85%' } });
 
-// About frame — 3D tilt on scroll
+// About bg-text parallax
 ScrollTrigger.create({
   trigger: '.s-about', start: 'top bottom', end: 'bottom top', scrub: true,
   onUpdate: (self) => {
-    gsap.set('.about-frame', { rotateY: (self.progress - 0.5) * 20, rotateX: (self.progress - 0.5) * -10, transformPerspective: 800 });
+    gsap.set('.about-bg-text', { y: (self.progress - 0.5) * 80 });
+  }
+});
+
+// ============================================
+// ZOOM WORD — Apple-style scale transition
+// Word at bottom of section grows to fill screen on scroll
+// ============================================
+
+// About → Luxury: "Design." раздувается
+ScrollTrigger.create({
+  trigger: '#about',
+  start: 'bottom bottom',
+  end: 'bottom top',
+  scrub: 1,
+  pin: false,
+  onUpdate: (self) => {
+    const p = self.progress;
+    // word scales up from 1 to ~30, fades out at the end
+    const scale = 1 + p * 28;
+    const opacity = p < 0.85 ? 1 : 1 - ((p - 0.85) / 0.15);
+    gsap.set('#about-zoom-word', { scale, opacity, transformOrigin: 'center center' });
+    // blur increases as it zooms
+    gsap.set('#about-zoom-word', { filter: `blur(${p * 12}px)` });
+    // simultaneously fade out about content
+    gsap.set('.about-center, .about-bg-text', { opacity: p < 0.3 ? 1 : 1 - ((p - 0.3) / 0.4) });
+  }
+});
+
+// Luxury → Contact: "Next." раздувается
+ScrollTrigger.create({
+  trigger: '#luxury',
+  start: 'bottom bottom',
+  end: 'bottom top',
+  scrub: 1,
+  onUpdate: (self) => {
+    const p = self.progress;
+    const scale = 1 + p * 28;
+    const opacity = p < 0.85 ? 1 : 1 - ((p - 0.85) / 0.15);
+    gsap.set('#luxury-zoom-word', { scale, opacity, transformOrigin: 'center center' });
+    gsap.set('#luxury-zoom-word', { filter: `blur(${p * 10}px)` });
+    // luxury content fades as zoom grows
+    gsap.set('.luxury-content', { opacity: p < 0.3 ? 1 : 1 - ((p - 0.3) / 0.4) });
   }
 });
 

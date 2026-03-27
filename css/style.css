@@ -774,111 +774,116 @@ body {
 }
 
 /* ============================================
-   SECTION 5 — ABOUT
+   ZOOM WORD TRANSITION (Apple-style)
    ============================================ */
-.s-about {
-  background: #f0ede8;
-  color: #111;
-  padding: 8rem 4rem;
+.zoom-trigger-wrap {
+  position: absolute;
+  bottom: 8vh;
+  left: 0; right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  z-index: 10;
+  overflow: hidden;
 }
 
-.about-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6rem;
+.zoom-word {
+  font-size: clamp(2.5rem, 7vw, 5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--accent);
+  transform-origin: center center;
+  will-change: transform, opacity;
+  display: inline-block;
+}
+
+.zoom-word.lux-zoom {
+  color: var(--gold);
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-style: italic;
+}
+
+/* ============================================
+   SECTION 5 — ABOUT (redesigned)
+   ============================================ */
+.s-about {
+  background: #080808;
+  color: var(--white);
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
+  text-align: center;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Giant background name */
+.about-bg-text {
+  position: absolute;
+  font-size: clamp(8rem, 22vw, 20rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200,255,0,0.08);
+  user-select: none;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 0;
+}
+
+.about-center {
+  position: relative;
+  z-index: 2;
+  max-width: 700px;
+  padding: 2rem;
 }
 
 .about-eyebrow {
   font-size: 0.7rem;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: #888;
+  color: rgba(255,255,255,0.35);
   display: block;
-  margin-bottom: 1.5rem;
-}
-
-.about-title {
-  font-family: var(--font-serif);
-  font-size: clamp(3rem, 6vw, 6rem);
-  font-weight: 300;
-  line-height: 1.1;
   margin-bottom: 2rem;
-  color: #111;
 }
 
-.about-title span {
-  color: var(--gold);
-  font-style: italic;
+.about-desc {
+  font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+  font-weight: 300;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.75);
+  margin-bottom: 3rem;
 }
 
-.about-text p {
-  color: #555;
-  font-size: 1rem;
-  line-height: 1.9;
-  max-width: 420px;
-  margin-bottom: 1.2rem;
-}
-
-.about-frame {
-  background: #111;
-  color: var(--white);
-  border-radius: 24px;
-  padding: 3rem;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.about-frame::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at top right, rgba(200,255,0,0.1), transparent 60%);
-}
-
-.about-badge {
-  display: inline-block;
-  background: rgba(200,255,0,0.15);
-  border: 1px solid rgba(200,255,0,0.3);
+.about-desc em {
   color: var(--accent);
-  font-size: 0.7rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  padding: 0.4rem 1rem;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.about-tags-inline {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.about-tags-inline span {
+  border: 1px solid rgba(200,255,0,0.2);
+  color: rgba(200,255,0,0.6);
+  padding: 0.4rem 1.1rem;
   border-radius: 20px;
-  margin-bottom: 2rem;
-}
-
-.about-badge::before {
-  content: '\25CF  ';
-  color: var(--accent);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
-
-.about-name {
-  font-family: var(--font-serif);
-  font-size: 3.5rem;
-  font-weight: 300;
+  font-size: 0.78rem;
   letter-spacing: 0.1em;
-  margin-bottom: 0.5rem;
-}
-
-.about-role {
-  font-size: 0.8rem;
-  color: rgba(255,255,255,0.4);
-  letter-spacing: 0.15em;
   text-transform: uppercase;
-  margin-bottom: 2.5rem;
 }
 
+/* Keep old about-tags for compatibility */
 .about-tags {
   display: flex;
   flex-wrap: wrap;
