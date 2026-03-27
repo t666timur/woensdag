@@ -144,7 +144,7 @@
   </section>
   <div class="transition t3b"></div>
 
-  <!-- СЕКЦИЯ 5: ABOUT — zoom reveal -->
+  <!-- СЕКЦИЯ 5: ABOUT -->
   <section id="about" class="section s-about">
     <div class="about-bg-text">TIMUR</div>
     <div class="about-center">
@@ -154,13 +154,22 @@
         <span>UI/UX</span><span>Frontend</span><span>Motion</span><span>Branding</span>
       </div>
     </div>
-    <!-- zoom word that expands into next section -->
-    <div class="zoom-trigger-wrap" id="about-zoom-wrap">
-      <div class="zoom-word" id="about-zoom-word">Design.</div>
-    </div>
   </section>
 
-  <!-- СЕКЦИЯ 6: LUXURY — revealed after zoom -->
+  <!-- CIRCLE REVEAL: About → Luxury -->
+  <div class="circle-reveal" id="reveal-luxury">
+    <div class="circle-reveal-inner">
+      <!-- Luxury section content inside the circle -->
+      <div class="reveal-label">05 / Luxury & Lifestyle</div>
+      <div class="reveal-luxury-content">
+        <span class="luxury-eyebrow">Premium Design</span>
+        <h2 class="luxury-title">Elegance<br><em>in every</em><br>detail</h2>
+        <p>For brands where aesthetics aren't optional — they're the product.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- СЕКЦИЯ 6: LUXURY -->
   <section id="luxury" class="section s-luxury">
     <div class="section-label dark">05 / Luxury & Lifestyle</div>
     <div class="luxury-content">
@@ -180,11 +189,10 @@
         </div>
       </div>
     </div>
-    <!-- zoom word into contact -->
-    <div class="zoom-trigger-wrap" id="luxury-zoom-wrap">
-      <div class="zoom-word lux-zoom" id="luxury-zoom-word">Next.</div>
-    </div>
   </section>
+
+  <!-- CIRCLE REVEAL: Luxury → Contact -->
+  <div class="circle-reveal circle-reveal-dark" id="reveal-contact"></div>
 
   <!-- TRANSITION 4→5 -->
   <div class="transition t4"></div>

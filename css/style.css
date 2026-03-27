@@ -774,36 +774,67 @@ body {
 }
 
 /* ============================================
-   ZOOM WORD TRANSITION (Apple-style)
+   CIRCLE REVEAL TRANSITION
    ============================================ */
-.zoom-trigger-wrap {
-  position: fixed;
-  bottom: 8vh;
-  left: 0; right: 0;
+.circle-reveal {
+  position: relative;
+  height: 100vh;
+  background: #f5f5f0;
+  clip-path: circle(0% at 50% 50%);
+  will-change: clip-path;
+  z-index: 2;
   display: flex;
-  justify-content: center;
   align-items: center;
-  pointer-events: none;
-  z-index: 50;
+  justify-content: center;
   overflow: hidden;
-  visibility: hidden;
 }
 
-.zoom-word {
-  font-size: clamp(2.5rem, 7vw, 5rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--accent);
-  transform-origin: center center;
-  will-change: transform, opacity;
-  display: inline-block;
+.circle-reveal-dark {
+  background: var(--dark);
+  height: 60vh;
 }
 
-.zoom-word.lux-zoom {
+.circle-reveal-inner {
+  text-align: center;
+  color: #111;
+  padding: 2rem;
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.4s, transform 0.4s;
+}
+
+.circle-reveal.revealed .circle-reveal-inner {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.reveal-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.3);
+  margin-bottom: 2rem;
+}
+
+.reveal-luxury-content .luxury-eyebrow {
   color: var(--gold);
+}
+
+.reveal-luxury-content .luxury-title {
   font-family: var(--font-serif);
+  font-size: clamp(2.5rem, 5vw, 5rem);
   font-weight: 300;
-  font-style: italic;
+  line-height: 1.1;
+  color: #111;
+  margin-bottom: 1.5rem;
+}
+
+.reveal-luxury-content p {
+  color: #777;
+  font-size: 1rem;
+  max-width: 400px;
+  margin: 0 auto;
+  line-height: 1.7;
 }
 
 /* ============================================

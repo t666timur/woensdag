@@ -758,61 +758,50 @@ ScrollTrigger.create({
 });
 
 // ============================================
-// ZOOM WORD — Apple-style scale transition
-// Fixed overlay word that grows to fill screen
+// CIRCLE REVEAL — About → Luxury
+// Медленное раздувание круга открывает новый стиль
 // ============================================
-
-// About → Luxury: "Design." раздувается
-ScrollTrigger.create({
-  trigger: '#about',
-  start: 'bottom 90%',
-  end: 'bottom 10%',
-  scrub: 1,
-  onEnter: () => gsap.set('#about-zoom-wrap', { visibility: 'visible' }),
-  onLeave: () => gsap.set('#about-zoom-wrap', { visibility: 'hidden', opacity: 1 }),
-  onEnterBack: () => gsap.set('#about-zoom-wrap', { visibility: 'visible' }),
-  onLeaveBack: () => gsap.set('#about-zoom-wrap', { visibility: 'hidden' }),
-  onUpdate: (self) => {
-    const p = self.progress;
-    const scale = 1 + p * 35;
-    const opacity = p < 0.8 ? 1 : 1 - ((p - 0.8) / 0.2);
-    gsap.set('#about-zoom-wrap', { opacity: 1 });
-    gsap.set('#about-zoom-word', {
-      scale,
-      opacity,
-      filter: `blur(${Math.min(p * 14, 20)}px)`,
-      transformOrigin: 'center center'
-    });
-    gsap.set('.about-center, .about-bg-text', {
-      opacity: p < 0.25 ? 1 : Math.max(0, 1 - ((p - 0.25) / 0.35))
-    });
+gsap.timeline({
+  scrollTrigger: {
+    trigger: '#reveal-luxury',
+    start: 'top 90%',
+    end: 'bottom 10%',
+    scrub: 2.5,          // медленно, плавно
+    onUpdate: (self) => {
+      const p = self.progress;
+      // circle grows from 0% to 150%
+      const pct = Math.round(p * 150);
+      document.getElementById('reveal-luxury').style.clipPath =
+        `circle(${pct}% at 50% 50%)`;
+      // content inside fades in after circle is big enough
+      if (p > 0.4) {
+        const innerP = (p - 0.4) / 0.6;
+        const inner = document.querySelector('#reveal-luxury .circle-reveal-inner');
+        if (inner) {
+          inner.style.opacity = innerP;
+          inner.style.transform = `scale(${0.88 + innerP * 0.12})`;
+        }
+      }
+    }
   }
 });
 
-// Luxury → Contact: "Next." раздувается
-ScrollTrigger.create({
-  trigger: '#luxury',
-  start: 'bottom 90%',
-  end: 'bottom 10%',
-  scrub: 1,
-  onEnter: () => gsap.set('#luxury-zoom-wrap', { visibility: 'visible' }),
-  onLeave: () => gsap.set('#luxury-zoom-wrap', { visibility: 'hidden', opacity: 1 }),
-  onEnterBack: () => gsap.set('#luxury-zoom-wrap', { visibility: 'visible' }),
-  onLeaveBack: () => gsap.set('#luxury-zoom-wrap', { visibility: 'hidden' }),
-  onUpdate: (self) => {
-    const p = self.progress;
-    const scale = 1 + p * 35;
-    const opacity = p < 0.8 ? 1 : 1 - ((p - 0.8) / 0.2);
-    gsap.set('#luxury-zoom-wrap', { opacity: 1 });
-    gsap.set('#luxury-zoom-word', {
-      scale,
-      opacity,
-      filter: `blur(${Math.min(p * 12, 18)}px)`,
-      transformOrigin: 'center center'
-    });
-    gsap.set('.luxury-content', {
-      opacity: p < 0.25 ? 1 : Math.max(0, 1 - ((p - 0.25) / 0.35))
-    });
+// ============================================
+// CIRCLE REVEAL — Luxury → Contact
+// Тёмный круг раздувается в Contact
+// ============================================
+gsap.timeline({
+  scrollTrigger: {
+    trigger: '#reveal-contact',
+    start: 'top 90%',
+    end: 'bottom 20%',
+    scrub: 2.5,
+    onUpdate: (self) => {
+      const p = self.progress;
+      const pct = Math.round(p * 150);
+      document.getElementById('reveal-contact').style.clipPath =
+        `circle(${pct}% at 50% 50%)`;
+    }
   }
 });
 
