@@ -1,12 +1,13 @@
 // ============================================
 // WOENSDAG — Main JS
-// Three.js + GSAP ScrollTrigger + Real 3D
+// Three.js + GSAP ScrollTrigger + Advanced 3D
+// Custom Shaders, Section Objects, Morph Anim
 // ============================================
 
 gsap.registerPlugin(ScrollTrigger);
 
 // ============================================
-// THREE.JS — Particle Field
+// THREE.JS — Setup
 // ============================================
 const canvas = document.getElementById('bg-canvas');
 const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
@@ -17,16 +18,426 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.z = 5;
 
-const count = 1500;
-const positions = new Float32Array(count * 3);
-for (let i = 0; i < count * 3; i++) positions[i] = (Math.random() - 0.5) * 20;
+// ============================================
+// PARTICLE CONFIGS — 4 морф-конфигурации
+// ============================================
+const PARTICLE_COUNT = 1200;
 
-const geo = new THREE.BufferGeometry();
-geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-const mat = new THREE.PointsMaterial({ size: 0.015, color: 0xc8ff00, transparent: true, opacity: 0.6 });
-const particles = new THREE.Points(geo, mat);
+function buildScatter() {
+  const arr = new Float32Array(PARTICLE_COUNT * 3);
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    arr[i * 3]     = (Math.random() - 0.5) * 18;
+    arr[i * 3 + 1] = (Math.random() - 0.5) * 18;
+    arr[i * 3 + 2] = (Math.random() - 0.5) * 12;
+  }
+  return arr;
+}
+
+function buildSphere() {
+  const arr = new Float32Array(PARTICLE_COUNT * 3);
+  const radius = 4;
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const phi   = Math.acos(2 * Math.random() - 1);
+    const theta = Math.random() * Math.PI * 2;
+    arr[i * 3]     = radius * Math.sin(phi) * Math.cos(theta);
+    arr[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+    arr[i * 3 + 2] = radius * Math.cos(phi);
+  }
+  return arr;
+}
+
+function buildTorus() {
+  const arr = new Float32Array(PARTICLE_COUNT * 3);
+  const R = 4, r = 1.4;
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const u = Math.random() * Math.PI * 2;
+    const v = Math.random() * Math.PI * 2;
+    arr[i * 3]     = (R + r * Math.cos(v)) * Math.cos(u);
+    arr[i * 3 + 1] = (R + r * Math.cos(v)) * Math.sin(u);
+    arr[i * 3 + 2] = r * Math.sin(v);
+  }
+  return arr;
+}
+
+function buildWave() {
+  const arr = new Float32Array(PARTICLE_COUNT * 3);
+  const cols = Math.ceil(Math.sqrt(PARTICLE_COUNT));
+  const rows = Math.ceil(PARTICLE_COUNT / cols);
+  const spacingX = 16 / cols;
+  const spacingZ = 10 / rows;
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const x = (col - cols * 0.5) * spacingX;
+    const z = (row - rows * 0.5) * spacingZ;
+    const y = Math.sin(x * 0.6) * Math.cos(z * 0.6) * 1.2;
+    arr[i * 3]     = x;
+    arr[i * 3 + 1] = y;
+    arr[i * 3 + 2] = z;
+  }
+  return arr;
+}
+
+const configA = buildScatter();
+const configB = buildSphere();
+const configC = buildTorus();
+const configD = buildWave();
+
+// Текущие позиции (стартуем со скаттера)
+const currentPositions = new Float32Array(configA);
+const targetPositions  = new Float32Array(configA);
+
+// Объект для GSAP-анимации морфинга
+const morphState = { progress: 0 };
+
+// ============================================
+// CUSTOM SHADERS
+// ============================================
+const vertexShader = `
+  uniform float uTime;
+  uniform float uSize;
+  uniform float uProgress;
+  attribute vec3 aTargetPosition;
+  attribute vec3 aColor;
+  varying vec3 vColor;
+
+  void main() {
+    vColor = aColor;
+    vec3 pos = mix(position, aTargetPosition, uProgress);
+
+    // subtle wave drift
+    pos.y += sin(pos.x * 2.0 + uTime) * 0.1;
+    pos.x += cos(pos.z * 2.0 + uTime * 0.7) * 0.08;
+
+    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+    gl_PointSize = uSize * (1.0 / -mvPosition.z);
+    gl_Position = projectionMatrix * mvPosition;
+  }
+`;
+
+const fragmentShader = `
+  uniform float uOpacity;
+  varying vec3 vColor;
+
+  void main() {
+    float dist = length(gl_PointCoord - vec2(0.5));
+    if (dist > 0.5) discard;
+    float alpha = 1.0 - smoothstep(0.3, 0.5, dist);
+    gl_FragColor = vec4(vColor, alpha * uOpacity);
+  }
+`;
+
+// Цвета для частиц
+const particleColors = new Float32Array(PARTICLE_COUNT * 3);
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+  particleColors[i * 3]     = 0.784; // r — lime #c8ff00
+  particleColors[i * 3 + 1] = 1.0;
+  particleColors[i * 3 + 2] = 0.0;
+}
+
+const particleGeo = new THREE.BufferGeometry();
+particleGeo.setAttribute('position',        new THREE.BufferAttribute(new Float32Array(configA), 3));
+particleGeo.setAttribute('aTargetPosition', new THREE.BufferAttribute(new Float32Array(configA), 3));
+particleGeo.setAttribute('aColor',          new THREE.BufferAttribute(particleColors, 3));
+
+const particleMat = new THREE.ShaderMaterial({
+  vertexShader,
+  fragmentShader,
+  uniforms: {
+    uTime:     { value: 0 },
+    uSize:     { value: 80 },
+    uProgress: { value: 0 },
+    uOpacity:  { value: 0.6 }
+  },
+  transparent: true,
+  depthWrite: false
+});
+
+const particles = new THREE.Points(particleGeo, particleMat);
 scene.add(particles);
 
+// ============================================
+// HELPER: запустить морфинг к целевому конфигу
+// ============================================
+function morphTo(targetConfig, duration) {
+  // Сохраняем текущие позиции как базу
+  const posAttr = particleGeo.getAttribute('position');
+  for (let i = 0; i < PARTICLE_COUNT * 3; i++) {
+    currentPositions[i] = posAttr.array[i];
+  }
+
+  // Задаём новую цель
+  const targetAttr = particleGeo.getAttribute('aTargetPosition');
+  for (let i = 0; i < PARTICLE_COUNT * 3; i++) {
+    targetAttr.array[i] = targetConfig[i];
+  }
+  targetAttr.needsUpdate = true;
+
+  // Обновляем position буфер текущими позициями
+  for (let i = 0; i < PARTICLE_COUNT * 3; i++) {
+    posAttr.array[i] = currentPositions[i];
+  }
+  posAttr.needsUpdate = true;
+
+  // Сбрасываем прогресс и анимируем
+  particleMat.uniforms.uProgress.value = 0;
+  gsap.to(particleMat.uniforms.uProgress, {
+    value: 1,
+    duration: duration || 1.8,
+    ease: 'power2.inOut',
+    onComplete: () => {
+      // После завершения обновляем position буфер финальными позициями
+      for (let i = 0; i < PARTICLE_COUNT * 3; i++) {
+        posAttr.array[i] = targetConfig[i];
+      }
+      for (let i = 0; i < PARTICLE_COUNT * 3; i++) {
+        targetAttr.array[i] = targetConfig[i];
+      }
+      posAttr.needsUpdate   = true;
+      targetAttr.needsUpdate = true;
+      particleMat.uniforms.uProgress.value = 0;
+    }
+  });
+}
+
+// ============================================
+// SECTION 3D OBJECTS
+// ============================================
+const sectionObjects = {};
+
+function makeMesh(geo, color, opacity, wireframe) {
+  const mat = new THREE.MeshBasicMaterial({
+    color,
+    transparent: true,
+    opacity,
+    wireframe: wireframe !== false,
+    depthWrite: false
+  });
+  return new THREE.Mesh(geo, mat);
+}
+
+// Hero — IcosahedronGeometry wireframe
+sectionObjects.hero = makeMesh(
+  new THREE.IcosahedronGeometry(2, 1),
+  0xc8ff00, 0.15, true
+);
+sectionObjects.hero.position.set(3, 0, -4);
+
+// Corporate — TorusGeometry wireframe
+sectionObjects.corporate = makeMesh(
+  new THREE.TorusGeometry(1.5, 0.4, 16, 100),
+  0x6464ff, 0.12, true
+);
+sectionObjects.corporate.position.set(-3, 0.5, -4);
+
+// Cyber — OctahedronGeometry solid
+sectionObjects.cyber = makeMesh(
+  new THREE.OctahedronGeometry(2, 0),
+  0x00f5ff, 0.08, false
+);
+sectionObjects.cyber.position.set(3.5, -0.5, -3.5);
+
+// Process — TorusKnotGeometry wireframe
+sectionObjects.process = makeMesh(
+  new THREE.TorusKnotGeometry(1.2, 0.3, 100, 16),
+  0xc8ff00, 0.1, true
+);
+sectionObjects.process.position.set(-2.5, 0, -4.5);
+
+// About — SphereGeometry wireframe
+sectionObjects.about = makeMesh(
+  new THREE.SphereGeometry(1.8, 8, 8),
+  0xc9a84c, 0.1, true
+);
+sectionObjects.about.position.set(3, 1, -4);
+
+// Luxury — RingGeometry flat
+sectionObjects.luxury = makeMesh(
+  new THREE.RingGeometry(1.5, 2, 64),
+  0xc9a84c, 0.08, false
+);
+sectionObjects.luxury.position.set(-2, -0.5, -3.5);
+sectionObjects.luxury.rotation.x = Math.PI * 0.25;
+
+// Contact — IcosahedronGeometry wireframe solid
+sectionObjects.contact = makeMesh(
+  new THREE.IcosahedronGeometry(1.5, 0),
+  0xc8ff00, 0.15, true
+);
+sectionObjects.contact.position.set(0, 1.5, -4);
+
+// Добавляем все объекты в сцену, изначально невидимые
+Object.values(sectionObjects).forEach(obj => {
+  obj.material.opacity = 0;
+  scene.add(obj);
+});
+
+// Целевые opacity для каждого объекта (когда он активен)
+const objectTargetOpacity = {
+  hero:      0.15,
+  corporate: 0.12,
+  cyber:     0.08,
+  process:   0.1,
+  about:     0.1,
+  luxury:    0.08,
+  contact:   0.15
+};
+
+// ============================================
+// SCROLL: показываем/скрываем 3D объекты
+// ============================================
+function showObject(name) {
+  const obj = sectionObjects[name];
+  if (!obj) return;
+  gsap.to(obj.material, { opacity: objectTargetOpacity[name], duration: 0.8, ease: 'power2.out' });
+}
+
+function hideObject(name) {
+  const obj = sectionObjects[name];
+  if (!obj) return;
+  gsap.to(obj.material, { opacity: 0, duration: 0.6, ease: 'power2.in' });
+}
+
+// Настройка видимости объектов по секциям
+const sectionNames = ['hero', 'corporate', 'cyber', 'process', 'about', 'luxury', 'contact'];
+sectionNames.forEach(name => {
+  const el = document.getElementById(name);
+  if (!el) return;
+  ScrollTrigger.create({
+    trigger: el,
+    start: 'top 70%',
+    end: 'bottom 30%',
+    onEnter:      () => { sectionNames.forEach(n => n !== name && hideObject(n)); showObject(name); },
+    onEnterBack:  () => { sectionNames.forEach(n => n !== name && hideObject(n)); showObject(name); },
+    onLeave:      () => hideObject(name),
+    onLeaveBack:  () => hideObject(name)
+  });
+});
+
+// Начальное состояние — hero виден
+showObject('hero');
+
+// ============================================
+// SCROLL: морфинг частиц по секциям
+// ============================================
+// Hero виден по умолчанию — configA (scatter)
+
+ScrollTrigger.create({
+  trigger: '.t1',
+  start: 'top center',
+  onEnter:     () => morphTo(configB, 1.8),  // Corporate → sphere
+  onEnterBack: () => morphTo(configA, 1.8)   // Hero → scatter
+});
+
+ScrollTrigger.create({
+  trigger: '.t2',
+  start: 'top center',
+  onEnter:     () => morphTo(configD, 1.6),  // Cyber → wave
+  onEnterBack: () => morphTo(configB, 1.6)   // Corporate → sphere
+});
+
+ScrollTrigger.create({
+  trigger: '.t3',
+  start: 'top center',
+  onEnter:     () => morphTo(configC, 2.0),  // Process → torus
+  onEnterBack: () => morphTo(configD, 1.6)   // Cyber → wave
+});
+
+ScrollTrigger.create({
+  trigger: '.t3b',
+  start: 'top center',
+  onEnter:     () => morphTo(configB, 1.8),  // About → sphere
+  onEnterBack: () => morphTo(configC, 2.0)   // Process → torus
+});
+
+ScrollTrigger.create({
+  trigger: '.t3c',
+  start: 'top center',
+  onEnter:     () => morphTo(configA, 2.0),  // Luxury → sparse scatter
+  onEnterBack: () => morphTo(configB, 1.8)   // About → sphere
+});
+
+ScrollTrigger.create({
+  trigger: '.t4',
+  start: 'top center',
+  onEnter:     () => morphTo(configD, 1.6),  // Contact → expanding wave
+  onEnterBack: () => morphTo(configA, 2.0)   // Luxury → scatter
+});
+
+// ============================================
+// SCROLL: цвет и opacity шейдерных частиц
+// ============================================
+const colorCache = { r: 0.784, g: 1.0, b: 0.0 };
+
+function updateParticleColors(r, g, b) {
+  colorCache.r = r; colorCache.g = g; colorCache.b = b;
+  const colorAttr = particleGeo.getAttribute('aColor');
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    colorAttr.array[i * 3]     = r;
+    colorAttr.array[i * 3 + 1] = g;
+    colorAttr.array[i * 3 + 2] = b;
+  }
+  colorAttr.needsUpdate = true;
+}
+
+ScrollTrigger.create({
+  trigger: '.t1', start: 'top center', end: 'bottom center',
+  onUpdate: (self) => {
+    const p = self.progress;
+    updateParticleColors(0.784*(1-p)+0.39*p, 1*(1-p)+0.51*p, 0*(1-p)+1*p);
+    particleMat.uniforms.uOpacity.value = 0.6 - p * 0.2;
+  }
+});
+
+ScrollTrigger.create({
+  trigger: '.t2', start: 'top center', end: 'bottom center',
+  onUpdate: (self) => {
+    const p = self.progress;
+    updateParticleColors(0.39*(1-p), 0.51*(1-p)+0.96*p, 1);
+    particleMat.uniforms.uOpacity.value = 0.4 + p * 0.3;
+  }
+});
+
+ScrollTrigger.create({
+  trigger: '.t3', start: 'top center', end: 'bottom center',
+  onUpdate: (self) => {
+    const p = self.progress;
+    particleMat.uniforms.uOpacity.value = 0.7*(1-p) + p*0.3;
+    particles.scale.setScalar(1 + p * 0.3);
+  }
+});
+
+ScrollTrigger.create({
+  trigger: '.t3b', start: 'top center', end: 'bottom center',
+  onUpdate: (self) => {
+    const p = self.progress;
+    particleMat.uniforms.uOpacity.value = 0.3*(1-p) + p*0.05;
+    particles.scale.setScalar(1.3 - p * 0.3);
+  }
+});
+
+ScrollTrigger.create({
+  trigger: '.t3c', start: 'top center', end: 'bottom center',
+  onUpdate: (self) => {
+    const p = self.progress;
+    particleMat.uniforms.uOpacity.value = 0.05 + p * 0.1;
+    particles.scale.setScalar(1 + p * 0.2);
+  }
+});
+
+ScrollTrigger.create({
+  trigger: '.t4', start: 'top center', end: 'bottom center',
+  onUpdate: (self) => {
+    const p = self.progress;
+    particleMat.uniforms.uOpacity.value = 0.15 + p * 0.5;
+    updateParticleColors(0.784, 1, 0);
+    particles.scale.setScalar(1.2 - p * 0.2);
+  }
+});
+
+// ============================================
+// RESIZE + MOUSE
+// ============================================
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -39,14 +450,59 @@ document.addEventListener('mousemove', (e) => {
   mouseY = (e.clientY / window.innerHeight - 0.5) * 0.3;
 });
 
+// ============================================
+// RENDER LOOP
+// ============================================
+const clock = new THREE.Clock();
+
 function animateThree() {
   requestAnimationFrame(animateThree);
-  particles.rotation.y += 0.0005;
-  particles.rotation.x += 0.0002;
+
+  const elapsed = clock.getElapsedTime();
+  particleMat.uniforms.uTime.value = elapsed;
+
+  // Rotation лёгкая для всего поля частиц
+  particles.rotation.y = elapsed * 0.03;
+  particles.rotation.x = elapsed * 0.01;
+
+  // Camera parallax от мыши
   camera.position.x += (mouseX - camera.position.x) * 0.02;
   camera.position.y += (-mouseY - camera.position.y) * 0.02;
+
+  // Анимация 3D объектов секций
+  const t = elapsed;
+  if (sectionObjects.hero.material.opacity > 0.001) {
+    sectionObjects.hero.rotation.x = t * 0.2;
+    sectionObjects.hero.rotation.y = t * 0.15;
+  }
+  if (sectionObjects.corporate.material.opacity > 0.001) {
+    sectionObjects.corporate.rotation.y = t * 0.4;
+    sectionObjects.corporate.rotation.x = t * 0.1;
+  }
+  if (sectionObjects.cyber.material.opacity > 0.001) {
+    sectionObjects.cyber.rotation.x = t * 0.8;
+    sectionObjects.cyber.rotation.z = t * 0.5;
+  }
+  if (sectionObjects.process.material.opacity > 0.001) {
+    sectionObjects.process.rotation.x = t * 0.15;
+    sectionObjects.process.rotation.y = t * 0.2;
+  }
+  if (sectionObjects.about.material.opacity > 0.001) {
+    sectionObjects.about.rotation.y = t * 0.12;
+    sectionObjects.about.rotation.x = Math.sin(t * 0.3) * 0.2;
+  }
+  if (sectionObjects.luxury.material.opacity > 0.001) {
+    sectionObjects.luxury.rotation.z = t * 0.08;
+    sectionObjects.luxury.position.y = -0.5 + Math.sin(t * 0.4) * 0.15;
+  }
+  if (sectionObjects.contact.material.opacity > 0.001) {
+    sectionObjects.contact.rotation.x = t * 0.6;
+    sectionObjects.contact.rotation.y = t * 0.4;
+  }
+
   renderer.render(scene, camera);
 }
+
 animateThree();
 
 // ============================================
@@ -234,59 +690,6 @@ tl4
     { rotateX: 0, y: '0%', filter: 'brightness(1)', ease: 'none' },
     0
   );
-
-// ============================================
-// PARTICLE COLOR SHIFTS по секциям
-// ============================================
-ScrollTrigger.create({
-  trigger: '.t1', start: 'top center', end: 'bottom center',
-  onUpdate: (self) => {
-    const p = self.progress;
-    mat.color.setRGB(0.784*(1-p)+0.39*p, 1*(1-p)+0.51*p, 0*(1-p)+1*p);
-    mat.opacity = 0.6 - p*0.2;
-  }
-});
-ScrollTrigger.create({
-  trigger: '.t2', start: 'top center', end: 'bottom center',
-  onUpdate: (self) => {
-    const p = self.progress;
-    mat.color.setRGB(0.39*(1-p), 0.51*(1-p)+0.96*p, 1*(1-p)+1*p);
-    mat.opacity = 0.4 + p*0.3;
-  }
-});
-ScrollTrigger.create({
-  trigger: '.t3', start: 'top center', end: 'bottom center',
-  onUpdate: (self) => {
-    const p = self.progress;
-    mat.opacity = 0.7*(1-p) + p*0.3;
-    particles.scale.setScalar(1 + p*0.3);
-  }
-});
-ScrollTrigger.create({
-  trigger: '.t3b', start: 'top center', end: 'bottom center',
-  onUpdate: (self) => {
-    const p = self.progress;
-    mat.opacity = 0.3*(1-p) + p*0.05;
-    particles.scale.setScalar(1.3 - p*0.3);
-  }
-});
-ScrollTrigger.create({
-  trigger: '.t3c', start: 'top center', end: 'bottom center',
-  onUpdate: (self) => {
-    const p = self.progress;
-    mat.opacity = 0.05 + p*0.1;
-    particles.scale.setScalar(1 + p*0.2);
-  }
-});
-ScrollTrigger.create({
-  trigger: '.t4', start: 'top center', end: 'bottom center',
-  onUpdate: (self) => {
-    const p = self.progress;
-    mat.opacity = 0.15 + p*0.5;
-    mat.color.setRGB(0.784, 1, 0);
-    particles.scale.setScalar(1.2 - p*0.2);
-  }
-});
 
 // ============================================
 // CORPORATE — glass cards entrance
