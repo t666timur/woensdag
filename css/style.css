@@ -26,6 +26,12 @@ body {
   overflow-x: hidden;
 }
 
+/* 3D perspective wrapper */
+#scene {
+  perspective: 1200px;
+  perspective-origin: 50% 50%;
+}
+
 /* Three.js Canvas */
 #bg-canvas {
   position: fixed;
@@ -109,12 +115,13 @@ body {
 .section-label.dark { color: rgba(0,0,0,0.3); }
 
 /* ============================================
-   TRANSITIONS
+   TRANSITIONS — spacers for scroll distance
    ============================================ */
 .transition {
   position: relative;
-  height: 30vh;
-  z-index: 1;
+  height: 50vh;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .t1 { background: linear-gradient(to bottom, #080808, #0a0f2e); }
