@@ -778,15 +778,6 @@ gsap.timeline({
       const pct = (eased * 152).toFixed(1);
       document.getElementById('reveal-luxury').style.clipPath =
         `circle(${pct}% at 50% 50%)`;
-      // content inside fades in after circle is big enough
-      if (p > 0.5) {
-        const innerP = (p - 0.5) / 0.5;
-        const inner = document.querySelector('#reveal-luxury .circle-reveal-inner');
-        if (inner) {
-          inner.style.opacity = innerP;
-          inner.style.transform = `scale(${0.9 + innerP * 0.1})`;
-        }
-      }
     }
   }
 });
