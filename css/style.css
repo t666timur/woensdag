@@ -416,7 +416,7 @@ body {
    SECTION 4 — LUXURY
    ============================================ */
 .s-luxury {
-  background: var(--luxury-bg);
+  background: linear-gradient(to bottom, var(--luxury-bg) 0%, #1a1614 100%);
   color: #1a1a1a;
   padding: 6rem 8rem;
   isolation: isolate;
@@ -489,13 +489,13 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  border-top: 1px solid rgba(26,26,26,0.12);
+  border-top: 1px solid rgba(255,255,255,0.12);
   padding-top: 2rem;
 }
 
 .luxury-caption {
   font-size: 0.85rem;
-  color: #7a7060;
+  color: rgba(255,255,255,0.45);
   line-height: 1.8;
   max-width: 260px;
 }
@@ -504,19 +504,19 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: #1a1a1a;
+  color: rgba(255,255,255,0.8);
   text-decoration: none;
   font-size: 0.78rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  border-bottom: 1px solid rgba(26,26,26,0.3);
+  border-bottom: 1px solid rgba(255,255,255,0.25);
   padding-bottom: 0.3rem;
   transition: all 0.3s;
   white-space: nowrap;
 }
 .btn-luxury:hover {
-  color: #a08850;
-  border-color: #a08850;
+  color: var(--gold);
+  border-color: var(--gold);
 }
 
 .luxury-deco-line {
