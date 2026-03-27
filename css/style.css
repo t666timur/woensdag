@@ -129,7 +129,7 @@ body {
 .t3 { background: linear-gradient(to bottom, #080808, #080808); }
 .t3b { background: linear-gradient(to bottom, #080808, #0d0d1a); height: 50vh; position: relative; z-index: 0; pointer-events: none; }
 .t3c { background: linear-gradient(to bottom, #f0ede8, #080808); height: 50vh; position: relative; z-index: 0; pointer-events: none; }
-.t4 { background: linear-gradient(to bottom, #f5f5f0, #080808); }
+.t4 { background: linear-gradient(to bottom, #ede8df, #080808); }
 
 /* ============================================
    SECTION 1 — HERO
@@ -415,9 +415,9 @@ body {
    SECTION 4 — LUXURY
    ============================================ */
 .s-luxury {
-  background: #f5f5f0;
-  color: #111;
-  padding: 5rem 6rem;
+  background: #ede8df;
+  color: #1a1a1a;
+  padding: 6rem 8rem;
   isolation: isolate;
   justify-content: space-between;
   gap: 0;
@@ -427,7 +427,7 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background: #f5f5f0;
+  background: #ede8df;
   z-index: 0;
 }
 
@@ -436,32 +436,33 @@ body {
   z-index: 1;
 }
 
-/* Luxury — полный редизайн */
+/* Luxury — редизайн */
 .luxury-top {
   width: 100%;
 }
 
 .luxury-eyebrow {
-  font-size: 0.7rem;
-  letter-spacing: 0.3em;
+  font-size: 0.65rem;
+  letter-spacing: 0.35em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: #a08850;
   display: block;
 }
 
 .luxury-hero-text {
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
+  padding-bottom: 2rem;
 }
 
 .luxury-title {
   font-family: var(--font-serif);
-  font-size: clamp(4.5rem, 11vw, 11rem);
+  font-size: clamp(3.5rem, 7.5vw, 8rem);
   font-weight: 300;
-  line-height: 0.95;
-  color: #111;
-  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: #1a1a1a;
+  letter-spacing: 0em;
 }
 
 .luxury-title .lux-line-text {
@@ -471,7 +472,7 @@ body {
 
 .luxury-title em {
   font-style: italic;
-  color: var(--gold);
+  color: #a08850;
 }
 
 .luxury-bottom {
@@ -479,39 +480,43 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+  border-top: 1px solid rgba(26,26,26,0.12);
+  padding-top: 2rem;
 }
 
 .luxury-caption {
-  font-size: 0.9rem;
-  color: #888;
-  line-height: 1.7;
-  max-width: 280px;
+  font-size: 0.85rem;
+  color: #7a7060;
+  line-height: 1.8;
+  max-width: 260px;
 }
 
 .btn-luxury {
-  display: inline-block;
-  color: #111;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #1a1a1a;
   text-decoration: none;
-  font-size: 0.85rem;
-  letter-spacing: 0.12em;
+  font-size: 0.78rem;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  border-bottom: 1px solid #111;
+  border-bottom: 1px solid rgba(26,26,26,0.3);
   padding-bottom: 0.3rem;
   transition: all 0.3s;
   white-space: nowrap;
 }
 .btn-luxury:hover {
-  color: var(--gold);
-  border-color: var(--gold);
+  color: #a08850;
+  border-color: #a08850;
 }
 
 .luxury-deco-line {
   position: absolute;
-  left: 6rem;
-  right: 6rem;
-  bottom: 30%;
+  left: 8rem;
+  right: 8rem;
+  top: 50%;
   height: 1px;
-  background: linear-gradient(to right, transparent, rgba(201,168,76,0.2), transparent);
+  background: linear-gradient(to right, transparent, rgba(160,136,80,0.15), transparent);
   pointer-events: none;
 }
 
@@ -769,7 +774,7 @@ body {
 .circle-reveal {
   position: relative;
   height: 100vh;
-  background: #f5f5f0;
+  background: #ede8df;
   isolation: isolate;
   clip-path: circle(0% at 50% 50%);
   will-change: clip-path;
