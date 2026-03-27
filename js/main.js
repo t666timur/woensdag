@@ -718,8 +718,18 @@ document.querySelectorAll('.stat-num').forEach(counter => {
 });
 
 // ============================================
-// LUXURY — 3D rocking frame on scroll
+// LUXURY — скрыть Three.js canvas, показать чистый фон
 // ============================================
+ScrollTrigger.create({
+  trigger: '#luxury',
+  start: 'top bottom',
+  end: 'bottom top',
+  onEnter:     () => { canvas.style.opacity = '0'; document.querySelector('.s-luxury').classList.add('is-active'); },
+  onLeave:     () => { canvas.style.opacity = '1'; document.querySelector('.s-luxury').classList.remove('is-active'); },
+  onEnterBack: () => { canvas.style.opacity = '0'; document.querySelector('.s-luxury').classList.add('is-active'); },
+  onLeaveBack: () => { canvas.style.opacity = '1'; document.querySelector('.s-luxury').classList.remove('is-active'); },
+});
+
 // Luxury — анимация входа (текст появляется снизу построчно)
 gsap.from('.luxury-eyebrow', {
   opacity: 0, y: 15, duration: 1,
