@@ -798,13 +798,13 @@ gsap.timeline({
 gsap.timeline({
   scrollTrigger: {
     trigger: '#reveal-contact',
-    start: 'top 90%',
-    end: 'bottom 20%',
+    start: 'top 10%',
+    end: 'bottom 90%',
     scrub: 2.5,
     onUpdate: (self) => {
       const p = self.progress;
       const eased = Math.pow(p, 2.2);
-      const pct = (eased * 152).toFixed(1);
+      const pct = ((1 - eased) * 152).toFixed(1);
       document.getElementById('reveal-contact').style.clipPath =
         `circle(${pct}% at 50% 50%)`;
     }

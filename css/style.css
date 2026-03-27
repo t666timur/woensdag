@@ -797,6 +797,7 @@ body {
 .circle-reveal-dark {
   background: linear-gradient(to bottom, var(--luxury-bg) 0%, var(--dark) 100%);
   height: 60vh;
+  clip-path: circle(152% at 50% 50%);
 }
 
 .circle-reveal-inner {
