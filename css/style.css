@@ -783,7 +783,7 @@ body {
 .circle-reveal {
   position: relative;
   height: 100vh;
-  background: var(--luxury-bg);
+  background: linear-gradient(to bottom, var(--dark) 0%, var(--luxury-bg) 100%);
   isolation: isolate;
   clip-path: circle(0% at 50% 50%);
   will-change: clip-path;
