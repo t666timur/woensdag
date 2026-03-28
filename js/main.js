@@ -709,10 +709,10 @@ ScrollTrigger.create({
   trigger: '#luxury',
   start: 'top bottom',
   end: 'bottom top',
-  onEnter:     () => { canvas.style.opacity = '0'; document.querySelector('.s-luxury').classList.add('is-active'); },
-  onLeave:     () => { canvas.style.opacity = '1'; document.querySelector('.s-luxury').classList.remove('is-active'); },
-  onEnterBack: () => { canvas.style.opacity = '0'; document.querySelector('.s-luxury').classList.add('is-active'); },
-  onLeaveBack: () => { canvas.style.opacity = '1'; document.querySelector('.s-luxury').classList.remove('is-active'); },
+  onEnter:     () => { canvas.style.opacity = '0'; },
+  onLeave:     () => { canvas.style.opacity = '1'; },
+  onEnterBack: () => { canvas.style.opacity = '0'; },
+  onLeaveBack: () => { canvas.style.opacity = '1'; },
 });
 
 // Luxury — анимация входа (текст появляется снизу построчно)
@@ -826,6 +826,24 @@ document.querySelectorAll('.glass-card, .price-card').forEach(card => {
     gsap.to(card, { rotateX: 0, rotateY: 0, duration: 0.5, ease: 'power3.out' });
   });
 });
+
+// ============================================
+// HAMBURGER MENU
+// ============================================
+const burger = document.getElementById('nav-burger');
+const navLinks = document.getElementById('nav-links');
+if (burger && navLinks) {
+  burger.addEventListener('click', () => {
+    burger.classList.toggle('open');
+    navLinks.classList.toggle('open');
+  });
+  navLinks.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      burger.classList.remove('open');
+      navLinks.classList.remove('open');
+    });
+  });
+}
 
 // ============================================
 // PARALLAX section labels
