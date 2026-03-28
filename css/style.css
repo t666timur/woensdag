@@ -130,7 +130,7 @@ body {
 .t3 { background: linear-gradient(to bottom, #080808, #080808); }
 .t3b { background: linear-gradient(to bottom, #080808, #0d0d1a); height: 50vh; position: relative; z-index: 0; pointer-events: none; }
 .t3c { background: var(--dark); height: 50vh; position: relative; z-index: 0; pointer-events: none; }
-.t4 { background: linear-gradient(to bottom, var(--luxury-bg), #080808); }
+.t4 { background: linear-gradient(to bottom, #080808, #080808); }
 
 /* ============================================
    SECTION 1 — HERO
